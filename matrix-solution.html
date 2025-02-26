@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Multiplication Animation</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166d67;
+            --accent: #ff6b6b;
+            --background: #f8f9fa;
+            --text: #333;
+            --light: #fff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--light);
+            padding: 2rem 0;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .card {
+            background-color: var(--light);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .matrix-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+        
+        .matrix {
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 0 1rem;
+            background-color: var(--light);
+            position: relative;
+        }
+        
+        .matrix-label {
+            position: absolute;
+            top: -15px;
+            left: 10px;
+            background-color: var(--primary);
+            color: var(--light);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .matrix-row {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .matrix-element {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin: 3px;
+            border-radius: 3px;
+            background-color: rgba(74, 111, 165, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .matrix-element.highlight {
+            background-color: var(--accent);
+            color: var(--light);
+            transform: scale(1.1);
+        }
+        
+        .operation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 0 1rem;
+        }
+        
+        .calculation-steps {
+            margin: 2rem 0;
+        }
+        
+        .step {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+            animation-delay: calc(var(--i) * 0.3s);
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 1rem;
+            background-color: rgba(74, 111, 165, 0.05);
+        }
+        
+        .highlight-text {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .conclusion {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: var(--light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px var(--shadow);
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            animation-delay: 3s;
+        }
+        
+        .calculation-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .equation {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            animation-delay: calc(var(--i) * 0.3s);
+        }
+        
+        .equals {
+            margin: 0 1rem;
+            font-weight: bold;
+        }
+        
+        .result {
+            padding: 0.5rem 1rem;
+            background-color: rgba(74, 111, 165, 0.1);
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .result.final {
+            background-color: var(--accent);
+            color: var(--light);
+            font-size: 1.2rem;
+            opacity: 0;
+            animation: pulseIn 1s forwards;
+            animation-delay: 2.5s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulseIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes highlightElement {
+            0% {
+                background-color: rgba(74, 111, 165, 0.1);
+                color: var(--text);
+            }
+            50% {
+                background-color: var(--accent);
+                color: var(--light);
+            }
+            100% {
+                background-color: rgba(74, 111, 165, 0.1);
+                color: var(--text);
+            }
+        }
+        
+        .animate-element {
+            animation: highlightElement 1.5s infinite;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: var(--light);
+            border-radius: 10px 10px 0 0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .matrix-display {
+                flex-direction: column;
+            }
+            
+            .matrix {
+                margin: 1rem 0;
+            }
+            
+            .operation {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Matrix Multiplication Solution</h1>
+        <p>A Digital Image Processing Application</p>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Problem Statement</h2>
+            <p>Given two transformation matrices:</p>
+            <ul>
+                <li>Matrix A = [1 2 4 2 6 0]</li>
+                <li>Matrix B as a 6×1 matrix = [4 3 3 1 5 2]<sup>T</sup></li>
+            </ul>
+            <p>We need to:</p>
+            <ol>
+                <li>Verify these matrices are conformable for multiplication</li>
+                <li>Calculate the resulting matrix</li>
+                <li>Show detailed steps for calculating elements of the result matrix</li>
+                <li>Explain what each row × column multiplication represents</li>
+            </ol>
+        </div>
+        
+        <div class="card">
+            <h2>Step 1: Verifying Conformability</h2>
+            <p>For matrix multiplication to be possible, the number of columns in the first matrix must equal the number of rows in the second matrix.</p>
+            
+            <div class="matrix-display">
+                <div class="matrix">
+                    <div class="matrix-label">A</div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">1</div>
+                        <div class="matrix-element">2</div>
+                        <div class="matrix-element">4</div>
+                        <div class="matrix-element">2</div>
+                        <div class="matrix-element">6</div>
+                        <div class="matrix-element">0</div>
+                    </div>
+                </div>
+                
+                <div class="operation">×</div>
+                
+                <div class="matrix">
+                    <div class="matrix-label">B</div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">4</div>
+                    </div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">3</div>
+                    </div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">3</div>
+                    </div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">1</div>
+                    </div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">5</div>
+                    </div>
+                    <div class="matrix-row">
+                        <div class="matrix-element">2</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="calculation-steps">
+                <div class="step" style="--i: 1">
+                    <p>Matrix A is a <span class="highlight-text">1×6</span> matrix (1 row, 6 columns).</p>
+                </div>
+                <div class="step" style="--i: 2">
+                    <p>Matrix B is a <span class="highlight-text">6×1</span> matrix (6 rows, 1 column).</p>
+                </div>
+                <div class="step" style="--i: 3">
+                    <p>Since the number of columns in A (6) equals the number of rows in B (6), these matrices are <span class="highlight-text">conformable for multiplication</span>.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Step 2: Calculate the Resulting Matrix</h2>
+            <p>When we multiply a 1×6 matrix by a 6×1 matrix, we get a 1×1 matrix (a single value).</p>
+            
+            <div class="calculation-animation">
+                <div class="equation" style="--i: 1">
+                    <div>A × B = </div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">1</div>
+                        </div>
+                    </div>
+                    <div>×</div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">4</div>
+                        </div>
+                    </div>
+                    <div class="equals">+</div>
+                    <div class="result">4</div>
+                </div>
+                
+                <div class="equation" style="--i: 2">
+                    <div></div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">2</div>
+                        </div>
+                    </div>
+                    <div>×</div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">3</div>
+                        </div>
+                    </div>
+                    <div class="equals">+</div>
+                    <div class="result">6</div>
+                </div>
+                
+                <div class="equation" style="--i: 3">
+                    <div></div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">4</div>
+                        </div>
+                    </div>
+                    <div>×</div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">3</div>
+                        </div>
+                    </div>
+                    <div class="equals">+</div>
+                    <div class="result">12</div>
+                </div>
+                
+                <div class="equation" style="--i: 4">
+                    <div></div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">2</div>
+                        </div>
+                    </div>
+                    <div>×</div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">1</div>
+                        </div>
+                    </div>
+                    <div class="equals">+</div>
+                    <div class="result">2</div>
+                </div>
+                
+                <div class="equation" style="--i: 5">
+                    <div></div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">6</div>
+                        </div>
+                    </div>
+                    <div>×</div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">5</div>
+                        </div>
+                    </div>
+                    <div class="equals">+</div>
+                    <div class="result">30</div>
+                </div>
+                
+                <div class="equation" style="--i: 6">
+                    <div></div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">0</div>
+                        </div>
+                    </div>
+                    <div>×</div>
+                    <div class="matrix">
+                        <div class="matrix-row">
+                            <div class="matrix-element animate-element">2</div>
+                        </div>
+                    </div>
+                    <div class="equals">=</div>
+                    <div class="result">0</div>
+                </div>
+                
+                <div class="equation" style="--i: 7">
+                    <div>Final Result:</div>
+                    <div class="equals">=</div>
+                    <div class="result">4 + 6 + 12 + 2 + 30 + 0</div>
+                    <div class="equals">=</div>
+                    <div class="result final">54</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Step 3: Detailed Calculation Steps</h2>
+            <p>Let's look at the detailed calculation of the matrix multiplication:</p>
+            
+            <div class="calculation-steps">
+                <div class="step" style="--i: 1">
+                    <p>A × B = (1×4) + (2×3) + (4×3) + (2×1) + (6×5) + (0×2)</p>
+                </div>
+                <div class="step" style="--i: 2">
+                    <p>= 4 + 6 + 12 + 2 + 30 + 0</p>
+                </div>
+                <div class="step" style="--i: 3">
+                    <p>= <span class="highlight-text">54</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Step 4: Row × Column Multiplication Explanation</h2>
+            <p>In this matrix multiplication, each component represents:</p>
+            
+            <div class="calculation-steps">
+                <div class="step" style="--i: 1">
+                    <p><span class="highlight-text">(1×4)</span>: The first element of matrix A multiplied by the first element of matrix B</p>
+                </div>
+                <div class="step" style="--i: 2">
+                    <p><span class="highlight-text">(2×3)</span>: The second element of matrix A multiplied by the second element of matrix B</p>
+                </div>
+                <div class="step" style="--i: 3">
+                    <p><span class="highlight-text">(4×3)</span>: The third element of matrix A multiplied by the third element of matrix B</p>
+                </div>
+                <div class="step" style="--i: 4">
+                    <p><span class="highlight-text">(2×1)</span>: The fourth element of matrix A multiplied by the fourth element of matrix B</p>
+                </div>
+                <div class="step" style="--i: 5">
+                    <p><span class="highlight-text">(6×5)</span>: The fifth element of matrix A multiplied by the fifth element of matrix B</p>
+                </div>
+                <div class="step" style="--i: 6">
+                    <p><span class="highlight-text">(0×2)</span>: The sixth element of matrix A multiplied by the sixth element of matrix B</p>
+                </div>
+            </div>
+            
+            <div class="step" style="--i: 7">
+                <p>In the context of image transformation, each of these multiplications represents how a specific component of the transformation (from matrix A) affects a corresponding pixel property (from matrix B). The sum of all these products gives us the final transformed value.</p>
+            </div>
+        </div>
+        
+        <div class="conclusion">
+            <h2>Conclusion</h2>
+            <p>The matrices A and B are conformable for multiplication, and the result of multiplying matrix A (1×6) by matrix B (6×1) is the 1×1 matrix [54].</p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Matrix Multiplication for Image Processing | Linear Algebra Assignment</p>
+    </footer>
+    
+    <script>
+        // Add interactive elements if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate elements on scroll
+            const animateOnScroll = () => {
+                const elements = document.querySelectorAll('.step, .equation');
+                
+                elements.forEach(element => {
+                    const rect = element.getBoundingClientRect();
+                    const isVisible = (rect.top <= window.innerHeight * 0.8);
+                    
+                    if (isVisible) {
+                        const delay = element.style.getPropertyValue('--i') || 1;
+                        element.style.animationDelay = `${delay * 0.2}s`;
+                        element.style.opacity = 1;
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            };
+            
+            window.addEventListener('scroll', animateOnScroll);
+            animateOnScroll(); // Initial check
+        });
+    </script>
+</body>
+</html>
